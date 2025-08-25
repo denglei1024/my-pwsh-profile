@@ -1,7 +1,7 @@
 # 设置 PowerShell 使用 UTF-8 编码
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\pure.omp.json" | Invoke-Expression
+oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\gruvbox.omp.json" | Invoke-Expression
 # 加载 git 状态增强
 Import-Module posh-git -ErrorAction SilentlyContinue
 # 文件图标美化
@@ -16,15 +16,6 @@ function Open-CurrentDirectory {
 }
 
 Set-Alias open Open-CurrentDirectory
-
-# 用rider打开项目
-function Open-Rider {
-    param([string]$slnPath)
-    $riderPath = "C:\Users\SJZY\AppData\Local\Programs\Rider\bin\rider64.exe"
-    Start-Process $riderPath $slnPath
-}
-Set-Alias rider Open-Rider
-
 
 # NOTE: registry keys for IE 8, may vary for other versions
 $regPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
@@ -57,42 +48,18 @@ $PSROptions = @{
     Colors = @{
         # 关键字、操作符：用 Solarized 的蓝色系，突出但不刺眼
         Operator         = $PSStyle.Foreground.Blue
-
         # 参数：用 Cyan，清晰区分
         Parameter        = $PSStyle.Foreground.Cyan
-
         # 选中内容：Solarized Light 下推荐暗灰背景+深蓝前景
         Selection        = $PSStyle.Foreground.White + $PSStyle.Background.DarkGray
-
         # 预测输入：亮灰前景 + 暗灰背景，更柔和，不会太抢眼
-        InLinePrediction = $PSStyle.Foreground.BrightBlack + $PSStyle.Background.White
+        InLinePrediction = $PSStyle.Foreground.BrightBlack
     }
 }
 
 Set-PSReadLineOption @PSROptions
 Set-PSReadLineKeyHandler -Chord 'Ctrl+f' -Function ForwardWord
 Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
-$ISETheme = @{
-    Command                  = $PSStyle.Foreground.FromRGB(0x0000FF)
-    Comment                  = $PSStyle.Foreground.FromRGB(0x006400)
-    ContinuationPrompt       = $PSStyle.Foreground.FromRGB(0x0000FF)
-    Default                  = $PSStyle.Foreground.FromRGB(0x0000FF)
-    Emphasis                 = $PSStyle.Foreground.FromRGB(0x287BF0)
-    Error                    = $PSStyle.Foreground.FromRGB(0xE50000)
-    InlinePrediction         = $PSStyle.Foreground.FromRGB(0x93A1A1)
-    Keyword                  = $PSStyle.Foreground.FromRGB(0x00008b)
-    ListPrediction           = $PSStyle.Foreground.FromRGB(0x06DE00)
-    Member                   = $PSStyle.Foreground.FromRGB(0x000000)
-    Number                   = $PSStyle.Foreground.FromRGB(0x800080)
-    Operator                 = $PSStyle.Foreground.FromRGB(0x757575)
-    Parameter                = $PSStyle.Foreground.FromRGB(0x000080)
-    String                   = $PSStyle.Foreground.FromRGB(0x8b0000)
-    Type                     = $PSStyle.Foreground.FromRGB(0x008080)
-    Variable                 = $PSStyle.Foreground.FromRGB(0xff4500)
-    ListPredictionSelected   = $PSStyle.Background.FromRGB(0x93A1A1)
-    Selection                = $PSStyle.Background.FromRGB(0x00BFFF)
-}
-Set-PSReadLineOption -Colors $ISETheme
 ## Add argument completer for the dotnet CLI tool
 $scriptblock = {
     param($wordToComplete, $commandAst, $cursorPosition)
@@ -105,3 +72,13 @@ Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 
 
 
+$env:GIT_MERGE_AUTOEDIT = "no"
+
+function gw {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]
+        $Branch
+    )
+    git worktree add ..\$Branch $Branch origin master
+}
