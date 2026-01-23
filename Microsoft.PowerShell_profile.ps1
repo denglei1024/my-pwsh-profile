@@ -8,6 +8,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 Import-Module Terminal-Icons -ErrorAction SilentlyContinue
 Import-Module posh-git -ErrorAction SilentlyContinue
 Import-Module PSReadLine -ErrorAction SilentlyContinue
+Install-Module -Name CompletionPredictor
 oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\material.omp.json" | Invoke-Expression
 
 
@@ -21,22 +22,18 @@ function Open-CurrentDirectory {
 
 Set-Alias open Open-CurrentDirectory
 
-
-Set-PSReadLineOption -PredictionSource History
 Set-PSReadLineOption -PredictionViewStyle ListView
 Set-PSReadLineOption -EditMode Windows
 Set-PSReadLineOption -HistorySearchCursorMovesToEnd
+Set-PSReadLineOption -PredictionSource HistoryAndPlugin
+Set-PSReadLineOption -ShowToolTips
 Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
 Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
-
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -ShowToolTips
 Set-PSReadLineKeyHandler -Chord 'Ctrl+f' -Function ForwardWord
 Set-PSReadLineKeyHandler -Chord 'Enter' -Function ValidateAndAcceptLine
 Set-PSReadLineKeyHandler -Key Tab -Function Complete
 
 Set-PSReadLineKeyHandler -Key Ctrl+C -Function Copy
-# Insert text from the clipboard as a here string
 Set-PSReadLineKeyHandler -Key Ctrl+V `
                          -BriefDescription PasteAsHereString `
                          -LongDescription "Paste the clipboard text as a here string" `
@@ -355,23 +352,6 @@ Set-PSReadLineKeyHandler -Key RightArrow `
 }
 
 
-Set-PSReadLineKeyHandler -Chord 'Alt+p' -ScriptBlock {
-    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::Insert('git pull')
-    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-}
-Set-PSReadLineKeyHandler -Chord 'Alt+s' -ScriptBlock {
-    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::Insert('git status')
-    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-}
-
-Set-PSReadLineKeyHandler -Chord 'Alt+g' -ScriptBlock {
-    [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
-    [Microsoft.PowerShell.PSConsoleReadLine]::Insert('git push')
-    [Microsoft.PowerShell.PSConsoleReadLine]::AcceptLine()
-}
-
 Set-PSReadLineKeyHandler -Key Alt+q -LongDescription "exit" -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::RevertLine()
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert("exit")
@@ -387,6 +367,7 @@ $scriptblock = {
         }
 }
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
+
 
 $env:GIT_MERGE_AUTOEDIT = "no"
 
@@ -414,3 +395,10 @@ function check-proxy {
         Write-Host "No proxy is currently set." -ForegroundColor Cyan
     }
 }
+
+
+# 搜索文本的简易 grep 命令
+Set-Alias grep Select-String
+
+
+
